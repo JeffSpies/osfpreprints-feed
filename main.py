@@ -6,14 +6,14 @@ import json
 app = Flask(__name__)
 
 
-def osf_url(urls):
+def osf_url(urls, service):
     for url in urls:
         if 'osf' in url:
-            return url.replace('preprints/socarxiv/', '')
+            return url.replace('preprints/' + service, '')
     return ''
 
 
-def build_feed(url, service="SocArXiV"):
+def build_feed(url, service):
     fg = FeedGenerator()
     fg.id('http://osf.io/preprints/' + service)
     fg.title(service + ' Preprints')
@@ -56,7 +56,7 @@ def build_feed(url, service="SocArXiV"):
         fe.title(entry['_source']['title'])
         fe.description(entry['_source']['description'])
         urls = entry['_source']['identifiers']
-        link_url = osf_url(urls)
+        link_url = osf_url(urls, service)
         fe.link(href=link_url)
         fe.id(link_url)
 
