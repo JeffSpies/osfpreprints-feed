@@ -5,33 +5,6 @@ import json
 
 app = Flask(__name__)
 
-headers = {'Content-Type': 'application/json'}
-
-response = requests.post('https://share.osf.io/api/v2/search/creativeworks/_search', headers=headers, data=json.dumps({
-    "query":{
-        "bool":{
-            "must":{
-                "query_string":{
-                    "query":"*"
-                }
-            },
-            "filter":[{
-                "term":{
-                    "sources":"SocArXiv"
-                }
-            }]
-        }
-    },
-    "from":0,
-    "aggregations":{
-        "sources":{
-            "terms":{
-                "field":"sources",
-                "size":500
-            }
-        }
-    }
-}))
 
 def osf_url(urls):
     for url in urls:
@@ -39,14 +12,53 @@ def osf_url(urls):
             return url.replace('preprints/socarxiv/', '')
     return ''
 
+
 @app.route("/")
-def hello():
+def index():
+    return "Feeds"
+
+
+@app.route("/socarxiv.rss")
+def socarxiv():
     fg = FeedGenerator()
     fg.id('http://osf.io/preprints/socarxiv')
     fg.title('http://osf.io/preprints/socarxiv')
     fg.author({'name': 'SocArXiv'})
     fg.link(href='http://osf.io/preprints/socarxiv', rel='alternate')
     fg.subtitle('Updates to SocArXiv')
+
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.post(
+        'https://share.osf.io/api/v2/search/creativeworks/_search',
+        headers=headers,
+        data=json.dumps({
+            "query": {
+                "bool": {
+                    "must": {
+                        "query_string": {
+                            "query": "*"
+                        }
+                    },
+                    "filter": [{
+                        "term": {
+                            "sources": "SocArXiv"
+                        }
+                    }]
+                }
+            },
+            "from": 0,
+            "aggregations": {
+                "sources": {
+                    "terms": {
+                        "field": "sources",
+                        "size": 500
+                    }
+                }
+            }
+        })
+    )
+
     for entry in response.json()['hits']['hits']:
         fe = fg.add_entry()
         fe.title(entry['_source']['title'])
