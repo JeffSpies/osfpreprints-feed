@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from feedgen.feed import FeedGenerator
 import requests
 import json
@@ -74,13 +74,17 @@ def index():
 @app.route("/socarxiv.rss")
 def socarxiv_rss():
     fg = build_feed(request.url)
-    return fg.rss_str(pretty=True)
+    response = Response(fg.rss_str(pretty=True))
+    response.headers['Content-Type'] = 'application/rss+xml'
+    return response
 
 
 @app.route("/socarxiv.atom")
 def socarxiv_atom():
     fg = build_feed(request.url)
-    return fg.atom_str(pretty=True)
+    response = Response(fg.atom_str(pretty=True))
+    response.headers['Content-Type'] = 'application/atom+xml'
+    return response
 
 if __name__ == "__main__":
     app.run()
