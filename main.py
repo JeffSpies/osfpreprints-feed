@@ -13,14 +13,14 @@ def osf_url(urls):
     return ''
 
 
-def build_feed(url):
+def build_feed(url, service="SocArXiV"):
     fg = FeedGenerator()
-    fg.id('http://osf.io/preprints/socarxiv')
-    fg.title('SocArXiV Preprints')
-    fg.author({'name': 'SocArXiv'})
+    fg.id('http://osf.io/preprints/' + service)
+    fg.title(service + ' Preprints')
+    fg.author({'name': service})
     fg.link(href=url, rel='self')
-    fg.link(href='https://osf.io/preprints/socarxiv', rel='alternate')
-    fg.subtitle('Preprints submitted to SocArXiv at https://osf.io/preprints/socarxiv')
+    fg.link(href='https://osf.io/preprints/' + service, rel='alternate')
+    fg.subtitle('Preprints submitted to ' + service + ' at https://osf.io/preprints/' + service)
 
     headers = {'Content-Type': 'application/json'}
 
@@ -60,7 +60,7 @@ def build_feed(url):
         fe.description(entry['_source']['description'])
         urls = entry['_source']['identifiers']
         link_url = osf_url(urls)
-        fe.link(href=link_url, rel='self')
+        fe.link(href=link_url)
         fe.id(link_url)
 
     return fg
@@ -79,12 +79,12 @@ def socarxiv_rss():
     return response
 
 
-@app.route("/socarxiv.atom")
-def socarxiv_atom():
-    fg = build_feed(request.url)
-    response = Response(fg.atom_str(pretty=True))
-    response.headers['Content-Type'] = 'application/atom+xml'
-    return response
+# @app.route("/socarxiv.atom")
+# def socarxiv_atom():
+#     fg = build_feed(request.url)
+#     response = Response(fg.atom_str(pretty=True))
+#     response.headers['Content-Type'] = 'application/atom+xml'
+#     return response
 
 if __name__ == "__main__":
     app.run()
