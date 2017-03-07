@@ -27,6 +27,7 @@ def build_feed(url, service="SocArXiV"):
     response = requests.post(
         'https://share.osf.io/api/v2/search/creativeworks/_search',
         headers=headers,
+
         data=json.dumps({
             "query": {
                 "bool": {
@@ -43,13 +44,9 @@ def build_feed(url, service="SocArXiV"):
                 }
             },
             "from": 0,
-            "aggregations": {
-                "sources": {
-                    "terms": {
-                        "field": "sources",
-                        "size": 500
-                    }
-                }
+            "size": 50,
+            "sort": {
+                "date_updated": "desc"
             }
         })
     )
