@@ -16,11 +16,11 @@ def osf_url(urls):
 def build_feed(url):
     fg = FeedGenerator()
     fg.id('http://osf.io/preprints/socarxiv')
-    fg.title('SocArXiV')
+    fg.title('SocArXiV Preprints')
     fg.author({'name': 'SocArXiv'})
     fg.link(href=url, rel='self')
-    fg.link(href='http://osf.io/preprints/socarxiv', rel='alternate')
-    fg.subtitle('Updates to SocArXiv')
+    fg.link(href='https://osf.io/preprints/socarxiv', rel='alternate')
+    fg.subtitle('Preprints submitted to SocArXiv at https://osf.io/preprints/socarxiv')
 
     headers = {'Content-Type': 'application/json'}
 
@@ -59,9 +59,9 @@ def build_feed(url):
         fe.title(entry['_source']['title'])
         fe.description(entry['_source']['description'])
         urls = entry['_source']['identifiers']
-        url = osf_url(urls)
-        fe.link(href=url, rel='self')
-        fe.id(url)
+        link_url = osf_url(urls)
+        fe.link(href=link_url, rel='self')
+        fe.id(link_url)
 
     return fg
 
