@@ -72,14 +72,14 @@ def index():
 
 
 @app.route("/socarxiv.rss")
-def socarxiv_rss(fg):
-    build_feed(request.url)
+def socarxiv_rss():
+    fg = build_feed(request.url)
     return fg.rss_str(pretty=True)
 
 
 @app.route("/socarxiv.atom")
-def socarxiv_atom(fg):
-    build_feed(request.url)
+def socarxiv_atom():
+    fg = build_feed(request.url)
     return fg.atom_str(pretty=True)
 
 if __name__ == "__main__":
