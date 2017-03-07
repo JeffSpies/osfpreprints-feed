@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from feedgen.feed import FeedGenerator
 import requests
 import json
@@ -13,17 +13,12 @@ def osf_url(urls):
     return ''
 
 
-@app.route("/")
-def index():
-    return "Feeds"
-
-
-@app.route("/socarxiv.rss")
-def socarxiv():
+def build_feed(url):
     fg = FeedGenerator()
     fg.id('http://osf.io/preprints/socarxiv')
-    fg.title('http://osf.io/preprints/socarxiv')
+    fg.title('SocArXiV')
     fg.author({'name': 'SocArXiv'})
+    fg.link(href=url, rel='self')
     fg.link(href='http://osf.io/preprints/socarxiv', rel='alternate')
     fg.subtitle('Updates to SocArXiv')
 
@@ -67,7 +62,25 @@ def socarxiv():
         url = osf_url(urls)
         fe.link(href=url, rel='self')
         fe.id(url)
-    return fg.rss_str()
+
+    return fg
+
+
+@app.route("/")
+def index():
+    return "Feeds"
+
+
+@app.route("/socarxiv.rss")
+def socarxiv_rss(fg):
+    build_feed(request.url)
+    return fg.rss_str(pretty=True)
+
+
+@app.route("/socarxiv.atom")
+def socarxiv_atom(fg):
+    build_feed(request.url)
+    return fg.atom_str(pretty=True)
 
 if __name__ == "__main__":
     app.run()
