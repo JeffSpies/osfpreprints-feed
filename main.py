@@ -2,25 +2,28 @@ from flask import Flask, request, Response
 from feedgen.feed import FeedGenerator
 import requests
 import json
+import re
 
 app = Flask(__name__)
 
 
+
 def osf_url(urls, service):
+    r = re.compile('preprints/{0}/'.format(service.lower()), re.IGNORECASE)
     for url in urls:
         if 'osf' in url:
-            return url.replace('preprints/' + service, '')
+            return r.sub('', url)
     return ''
 
 
 def build_feed(url, service):
     fg = FeedGenerator()
-    fg.id('http://osf.io/preprints/' + service)
-    fg.title(service + ' Preprints')
+    fg.id('http://osf.io/preprints/{0}'.format(service.lower()))
+    fg.title('{0} Preprints'.format(service))
     fg.author({'name': service})
     fg.link(href=url, rel='self')
-    fg.link(href='https://osf.io/preprints/' + service, rel='alternate')
-    fg.subtitle('Preprints submitted to ' + service + ' at https://osf.io/preprints/' + service)
+    fg.link(href='https://osf.io/preprints/{0}'.format(service.lower()), rel='alternate')
+    fg.subtitle('Preprints submitted to {0} at https://osf.io/preprints/{1}'.format(service, service.lower()))
 
     headers = {'Content-Type': 'application/json'}
 
@@ -38,7 +41,7 @@ def build_feed(url, service):
                     },
                     "filter": [{
                         "term": {
-                            "sources": "SocArXiv"
+                            "sources": service
                         }
                     }]
                 }
@@ -68,20 +71,12 @@ def index():
     return "Feeds"
 
 
-@app.route("/socarxiv.rss")
-def socarxiv_rss():
-    fg = build_feed(request.url)
+@app.route("/<service>.rss")
+def socarxiv_rss(service=None):
+    fg = build_feed(request.url, service)
     response = Response(fg.rss_str(pretty=True))
     response.headers['Content-Type'] = 'application/rss+xml'
     return response
-
-
-# @app.route("/socarxiv.atom")
-# def socarxiv_atom():
-#     fg = build_feed(request.url)
-#     response = Response(fg.atom_str(pretty=True))
-#     response.headers['Content-Type'] = 'application/atom+xml'
-#     return response
 
 if __name__ == "__main__":
     app.run()
