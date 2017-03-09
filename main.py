@@ -73,6 +73,8 @@ def index():
 
 @app.route("/<service>.rss")
 def socarxiv_rss(service=None):
+    if service=='socarxiv':
+        service = 'SocArXiv'
     fg = build_feed(request.url, service)
     response = Response(fg.rss_str(pretty=True))
     response.headers['Content-Type'] = 'application/rss+xml'
