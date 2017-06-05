@@ -6,10 +6,24 @@ import re
 
 app = Flask(__name__)
 
-services = {
-    'socarxiv': 'SocArXiv',
-    'engrxiv': 'engrXiv'
-}
+# This mapping doesn't need to exist, but it does make the app more robust, i.e., url.com/feed/EngrXiv would work
+# even though the actual term is engriXiv.
+# TODO: SHARE reallly just needs to make these terms case-insensitive.
+services_list = [
+    'engrXiv',
+    'PsyArXiv',
+    'SocArXiv',
+    'BITSS',
+    'AgriXiv',
+    'LawArXiv'
+]
+
+services = { service.lower():service for service in services_list }
+
+def valid_xml(text):
+    # There's not a better solution than this?
+    # https://stackoverflow.com/questions/8733233/filtering-out-certain-bytes-in-python
+    return re.sub(u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\u10000-\u10FFFF]+', '', text)
 
 def osf_url(urls, service):
     r = re.compile('preprints/{0}/'.format(service.lower()), re.IGNORECASE)
@@ -59,8 +73,8 @@ def build_feed(url, service):
 
     for entry in response.json()['hits']['hits']:
         fe = fg.add_entry()
-        fe.title(entry['_source']['title'])
-        fe.description(entry['_source']['description'])
+        fe.title(valid_xml(entry['_source']['title']))
+        fe.description(valid_xml(entry['_source']['description']))
         urls = entry['_source']['identifiers']
         link_url = osf_url(urls, service)
         fe.link(href=link_url)
@@ -79,8 +93,8 @@ def rss(service=None):
     lowercase_service = service.lower()
     if lowercase_service in services:
         service = services[lowercase_service]
-
     fg = build_feed(request.url, service)
+    print(fg.rss_str(pretty=True))
     response = Response(fg.rss_str(pretty=True))
     response.headers['Content-Type'] = 'application/rss+xml'
     return response
