@@ -6,7 +6,10 @@ import re
 
 app = Flask(__name__)
 
-
+services = {
+    'socarxiv': 'SocArXiv',
+    'engrxiv': 'engrXiv'
+}
 
 def osf_url(urls, service):
     r = re.compile('preprints/{0}/'.format(service.lower()), re.IGNORECASE)
@@ -72,9 +75,11 @@ def index():
 
 
 @app.route("/<service>.rss")
-def socarxiv_rss(service=None):
-    if service=='socarxiv':
-        service = 'SocArXiv'
+def rss(service=None):
+    lowercase_service = service.lower()
+    if lowercase_service in services:
+        service = services[lowercase_service]
+
     fg = build_feed(request.url, service)
     response = Response(fg.rss_str(pretty=True))
     response.headers['Content-Type'] = 'application/rss+xml'
