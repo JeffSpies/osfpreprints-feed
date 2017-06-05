@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 from feedgen.feed import FeedGenerator
+from unidecode import unidecode
 import requests
 import json
 import re
@@ -21,9 +22,9 @@ services_list = [
 services = { service.lower():service for service in services_list }
 
 def valid_xml(text):
-    # There's not a better solution than this?
-    # https://stackoverflow.com/questions/8733233/filtering-out-certain-bytes-in-python
-    return re.sub(u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\u10000-\u10FFFF]+', '', text)
+    # I added unidecode to the following
+    #   https://stackoverflow.com/questions/8733233/filtering-out-certain-bytes-in-python
+    return re.sub(u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\u10000-\u10FFFF]+', '', unidecode(text))
 
 def osf_url(urls, service):
     r = re.compile('preprints/{0}/'.format(service.lower()), re.IGNORECASE)
