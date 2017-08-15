@@ -67,7 +67,7 @@ def build_feed(url, service):
             "from": 0,
             "size": 50,
             "sort": {
-                "date_updated": "desc"
+                "date_created": "desc"
             }
         })
     )
