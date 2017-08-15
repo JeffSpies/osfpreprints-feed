@@ -60,6 +60,9 @@ def build_feed(url, service):
                     "filter": [{
                         "term": {
                             "sources": service
+                        },
+                        "term": {
+                            "types": "preprint",
                         }
                     }]
                 }
