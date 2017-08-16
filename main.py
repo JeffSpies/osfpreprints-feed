@@ -57,14 +57,18 @@ def build_feed(url, service):
                             "query": "*"
                         }
                     },
-                    "filter": [{
-                        "term": {
-                            "sources": service
+                    "filter": [
+                        {
+                            "term": {
+                                "sources": service
+                            },
                         },
-                        "term": {
-                            "types": "preprint"
+                        {
+                            "term": {
+                                "types": "preprint"
+                            }
                         }
-                    }]
+                    ]
                 }
             },
             "from": 0,
@@ -98,7 +102,6 @@ def rss(service=None):
     if lowercase_service in services:
         service = services[lowercase_service]
     fg = build_feed(request.url, service)
-    print(fg.rss_str(pretty=True))
     response = Response(fg.rss_str(pretty=True))
     response.headers['Content-Type'] = 'application/rss+xml'
     return response
