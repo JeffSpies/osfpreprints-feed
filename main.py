@@ -62,7 +62,7 @@ def build_feed(url, service):
                             "sources": service
                         },
                         "term": {
-                            "types": "preprint",
+                            "types": "preprint"
                         }
                     }]
                 }
