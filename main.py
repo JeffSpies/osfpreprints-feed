@@ -1,3 +1,4 @@
+from dateutil import parser
 from flask import Flask, request, Response
 from feedgen.feed import FeedGenerator
 from unidecode import unidecode
@@ -79,7 +80,9 @@ def build_feed(url, service):
         })
     )
 
-    for entry in response.json()['hits']['hits']:
+    entries = response.json()['hits']['hits']
+
+    for entry in entries:
         fe = fg.add_entry()
         fe.title(valid_xml(entry['_source']['title']))
         fe.description(valid_xml(entry['_source']['description']))
@@ -87,6 +90,11 @@ def build_feed(url, service):
         link_url = osf_url(urls, service)
         fe.link(href=link_url)
         fe.id(link_url)
+
+    # IFTTT doesn't seem to respect guid, so I'm setting the build date as the latest
+    # entry. This should work becasue we sort by date_created.
+    lastBuildDate = entries[0]['_source']['date_created']
+    fg.lastBuildDate(parser.parse(lastBuildDate))
 
     return fg
 
